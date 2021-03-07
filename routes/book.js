@@ -1,142 +1,153 @@
+const {
+    createBookRecord,
+    getBookList,
+    getBookDetail,
+	deleteBook,
+    updateBook
+} = require('../controllers/books')
 var express = require('express');
-var Book = require('../models/book');
 var router = express.Router();
 
-const Errors = require("../common/errors")
-const Success = require("../common/success")
-const MyLogger = require("../common/logger")
+/**
+ * @swagger
+ * /books:
+ *   post:
+ *     summary: Create a book record 
+ *     description: Add new book to the library. parameter to provide is name(String), authorName(String),releaseDate(integer).
+ *     requestBody:
+ *       content:
+ *          application/json:
+ *            schema:
+ *              properties:
+ *               name:
+ *                  type: string
+ *                  description: Book name
+ *               authorName:
+ *                  type: string
+ *                  description: Author Name
+ *               releaseDate:
+ *                  type: number
+ *                  description: Release-Date
+ *     responses:
+ *          201:
+ *            description: Created New Book Record
+ *          404:
+ *            description: Couldn't Create New Record
+ *          200:
+ *            description: Handled Exception
+ *          500:
+ *            description: Unhandled Exception
+ *       
+ *      
+ * 
+*/
+router.post('/',createBookRecord )
 
-const utils = require('../common/utils');
-const config = require('../config');
-
-
-router.post('/', async function(req, res) {
-    try {
-        // Create Logger
-        var logger = new MyLogger(config.logs.api.category, config.logs.api.path)
-        logger.CreateLogger()
-
-        var newBook = new Book();
-        newBook.name = req.body.name;
-        newBook.authorName = req.body.authorName;
-
-
-        var book = await newBook.save();
-
-        if (book) {
-            var result_data = {}
-            result_data.uuid = book.uuid
-            result_data.name = book.name
-            result_data.authorName = book.authorName
-            result_data.releaseDate = book.releaseDate
-            return res.status(201).json(utils.successResponse(Success.NewBookCreated,result_data))
-        }
-        return res.status(404).json(utils.errorResponse(Erros.NoNewRecordCreated))
-
-
-    } catch (err) {
-        logger.LogError("post-book : " + err.stack)
-        return res.status(500).json(utils.errorResponse(Errors.SomeErrorOccurred))
-    }
-})
-
-router.get('/', async function(req, res) {
-    try {
-        // Create Logger
-        var logger = new MyLogger(config.logs.api.category, config.logs.api.path)
-        logger.CreateLogger()
-
-        var book = await Book.find({}).select({
-            "_id": 0,
-            "__v": 0
-        });
-
-        if (book.length == 0) return res.status(404).json(utils.errorResponse(Errors.NoDataFound))
-
-        return res.status(200).json(utils.successResponse(Success.Success,book))
-
-    } catch (err) {
-        logger.LogError("get-books : " + err.stack)
-        return res.status(500).json(utils.errorResponse(Errors.SomeErrorOccurred))
-    }
-})
+/**
+ * @swagger
+ * /books:
+ *   get:
+ *     summary: Get Book list
+ *     description: Retrieve a list of Books.
+ *     responses:
+ *          200:
+ *            description: get Books list 
+ *          404:
+ *            description: 404 NOT FOUND
+ *          500:
+ *            description: Unhandled Exception
+*/
+router.get('/',getBookList )
 
 
-router.get('/:uuid', async function(req, res) {
-    try {
-        // Create Logger
-        var logger = new MyLogger(config.logs.api.category, config.logs.api.path)
-        logger.CreateLogger()
-
-        var book = await Book.find({uuid:req.params.uuid}).select({
-            "_id": 0,
-            "__v": 0
-        });
-
-        if (book.length == 0) return res.status(404).json(utils.errorResponse(Errors.NoDataFound))
-
-        return res.status(200).json(utils.successResponse(Success.Success,book))
-
-    } catch (err) {
-        logger.LogError("get-books : " + err.stack)
-        return res.status(500).json(utils.errorResponse(Errors.SomeErrorOccurred))
-    }
-})
-
-router.delete('/:uuid', async function(req, res) {
-    try {
-        
-        // Create Logger
-        var logger = new MyLogger(config.logs.api.category, config.logs.api.path)
-        logger.CreateLogger()
-
-        var book = await Book.findOneAndDelete({
-            uuid: req.params.uuid
-        });
-        
-        if (book) return res.status(200).json(utils.successResponse(Success.DeleteRecord))
-
-        return res.status(404).json(utils.errorResponse(Errors.DeleteFailed))
-
-    } catch (err) {
-        logger.LogError("delete-books : " + err.stack)
-        return res.status(500).json(utils.errorResponse(Errors.SomeErrorOccurred))
-    }
-})
+/**
+ * @swagger
+ * paths:
+ *  /books/{uuid}:
+ *    get:
+ *     summary: Retrieve a single book
+ *     description: Retrieve detail of single book
+ *     responses:
+ *       200:
+ *          description: get single book records
+ *       404:
+ *            description: 404 NOT FOUND
+ *       500:
+ *            description: Unhandled Exception
+ *     parameters:
+ *     - in: path
+ *       name: uuid
+ *       schema:
+ *          type: string
+ *          required: true
+ *       
 
 
-router.put('/:uuid', async function(req, res) {
-    try {
-        // Create Logger
-        var logger = new MyLogger(config.logs.api.category, config.logs.api.path)
-        logger.CreateLogger()
+*/
+router.get('/:uuid',getBookDetail )
 
-        updateData = {}
-        updateData.name = req.body.name;
-        updateData.authorName = req.body.authorName;
-
-        // update Book record
-        var book = await Book.findOneAndUpdate({
-            uuid: req.params.uuid
-        },updateData,{'new':true});
-
-        if (book) {
-            resultData = {}
-            resultData.uuid = book.uuid
-            resultData.name = book.name
-            resultData.authorName = book.authorName
-            resultData.releaseDate = book.releaseDate
-            return res.status(201).json(utils.successResponse(Success.UpdateSuccesful,resultData))
-        }
-
-        return res.status(404).json(utils.errorResponse(Errors.UpdateFailed))
-
+/**
+ * @swagger
+ * paths:
+ *  /books/{uuid}:
+ *    delete:
+ *     summary: delete a single book
+ *     description: delete a single book
+ *     responses:
+ *       200:
+ *          description: delete single book records
+ *       404:
+ *            description: 404 NOT FOUND
+ *       500:
+ *            description: Unhandled Exception
+ *     parameters:
+ *     - in: path
+ *       name: uuid
+ *       schema:
+ *          type: string
+ *          required: true
+ *       
 
 
-    } catch (err) {
-        logger.LogError("put-book : " + err.stack)
-        return res.status(500).json(utils.errorResponse(Errors.SomeErrorOccurred))
-    }
-})
+*/
+router.delete('/:uuid',deleteBook )
+
+/**
+ * @swagger
+ * /books/{uuid}:
+ *   put:
+ *     summary: Create a book record 
+ *     description: Add new book to the library. release date will be current unix time and parameter to provide is name, authorName.
+ *     parameters:
+ *     - in: path
+ *       name: uuid
+ *       schema:
+ *          type: string
+ *          required: true
+ *     requestBody:
+ *       content:
+ *          application/json:
+ *            schema:
+ *              properties:
+ *               name:
+ *                  type: string
+ *                  description: Book name
+ *               authorName:
+ *                  type: string
+ *                  description: Author Name
+ *               releaseDate:
+ *                  type: number
+ *                  description: Release-Date
+ *     responses:
+ *          201:
+ *            description: update Book record
+ *          404:
+ *            description: 404 NOT FOUND
+ *          500:
+ *            description: Unhandled Exception
+ *      
+ * 
+*/
+router.put('/:uuid', updateBook)
 
 module.exports = router;
