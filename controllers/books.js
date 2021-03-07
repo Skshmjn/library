@@ -17,12 +17,14 @@ async function createBookRecord(req, res) {
 
         var name = req.body.name
         var authorName = req.body.authorName
+        var releaseDate = req.body.releaseDate
 
         utils.checkIfPresent(name, authorName)
 
         var newBook = new Book();
         newBook.name = name;
         newBook.authorName = authorName
+        newBook.releaseDate = releaseDate
     
 
         var book = await newBook.save();
@@ -35,7 +37,7 @@ async function createBookRecord(req, res) {
             result_data.releaseDate = book.releaseDate
             return res.status(201).json(utils.successResponse(Success.NewBookCreated,result_data))
         }
-        return res.status(404).json(utils.errorResponse(Erros.NoNewRecordCreated))
+        return res.status(404).json(utils.errorResponse(Errors.NoNewRecordCreated))
 
 
     } catch (err) {
@@ -120,12 +122,14 @@ async function updateBook(req, res) {
 
         var name = req.body.name
         var authorName = req.body.authorName
+        var releaseDate = req.body.releaseDate
 
-        utils.checkIfPresent(name, authorName)
+        utils.checkIfPresent(name, authorName, releaseDate)
 
         updateData = {}
         updateData.name = name;
         updateData.authorName = authorName;
+        updateData.releaseDate = releaseDate
 
         // update Book record
         var book = await Book.findOneAndUpdate({
