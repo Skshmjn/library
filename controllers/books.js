@@ -124,7 +124,7 @@ async function updateBook(req, res) {
         var authorName = req.body.authorName
         var releaseDate = req.body.releaseDate
 
-        utils.checkIfPresent(name, authorName, releaseDate)
+        utils.checkIfPresent(name, authorName)
 
         updateData = {}
         updateData.name = name;
