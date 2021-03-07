@@ -1,6 +1,7 @@
 var express = require('express');
 var Book = require('../models/book');
 var router = express.Router();
+var customException = require('../common/custom_exception')
 
 const Errors = require("../common/errors")
 const Success = require("../common/success")
@@ -8,6 +9,7 @@ const MyLogger = require("../common/logger")
 
 const utils = require('../common/utils');
 const config = require('../config');
+const { response } = require('express');
 
 
 router.post('/', async function(req, res) {
@@ -16,10 +18,15 @@ router.post('/', async function(req, res) {
         var logger = new MyLogger(config.logs.api.category, config.logs.api.path)
         logger.CreateLogger()
 
-        var newBook = new Book();
-        newBook.name = req.body.name;
-        newBook.authorName = req.body.authorName;
+        var name = req.body.name
+        var authorName = req.body.authorName
 
+        utils.checkIfPresent(name, authorName)
+
+        var newBook = new Book();
+        newBook.name = name;
+        newBook.authorName = authorName
+    
 
         var book = await newBook.save();
 
@@ -35,8 +42,14 @@ router.post('/', async function(req, res) {
 
 
     } catch (err) {
-        logger.LogError("post-book : " + err.stack)
+        if(err instanceof customException){
+            return res.status(200).json(utils.errorResponse(err))
+        }else{
+       
+            logger.LogError("post-book : " + err.stack)
         return res.status(500).json(utils.errorResponse(Errors.SomeErrorOccurred))
+        }
+        
     }
 })
 
@@ -111,9 +124,14 @@ router.put('/:uuid', async function(req, res) {
         var logger = new MyLogger(config.logs.api.category, config.logs.api.path)
         logger.CreateLogger()
 
+        var name = req.body.name
+        var authorName = req.body.authorName
+
+        utils.checkIfPresent(name, authorName)
+
         updateData = {}
-        updateData.name = req.body.name;
-        updateData.authorName = req.body.authorName;
+        updateData.name = name;
+        updateData.authorName = authorName;
 
         // update Book record
         var book = await Book.findOneAndUpdate({
@@ -133,10 +151,14 @@ router.put('/:uuid', async function(req, res) {
 
 
 
-    } catch (err) {
-        logger.LogError("put-book : " + err.stack)
+    } catch (err){
+        if(err instanceof customException){
+            return res.status(200).json(utils.errorResponse(err))
+        }else{
+       
+            logger.LogError("post-book : " + err.stack)
         return res.status(500).json(utils.errorResponse(Errors.SomeErrorOccurred))
-    }
-})
+        }
+}})
 
 module.exports = router;

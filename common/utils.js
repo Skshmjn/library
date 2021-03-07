@@ -1,4 +1,4 @@
-// var customException = require('./customException')
+var customException = require('./custom_exception')
 
 function successResponse(success,data) {
 
@@ -27,9 +27,9 @@ function errorResponse(error,code) {
 function checkIfPresent(...args) {
   var result = args.every(isPresent)
 
-  // if (result == false) {
-  //   throw new customException(errors.ProvideRequiredParmeters)
-  // }
+  if (result == false) {
+    throw new customException(errors.ProvideRequiredParmeters)
+  }
 
 }
 
@@ -38,3 +38,4 @@ function isPresent(value) {
 }
 module.exports.successResponse = successResponse;
 module.exports.errorResponse  = errorResponse;
+module.exports.checkIfPresent = checkIfPresent;
