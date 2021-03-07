@@ -6,21 +6,7 @@ const books = require('./routes/book');
 const swaggerJsDoc = require('swagger-jsdoc')
 const swaggerUi = require('swagger-ui-express');
 
-const swaggerDefinition = {
-    openapi: '3.0.0',
-    info: {
-      title: 'Libray Api Documentation',
-      description: 'assignment for techalchemy',
-            contact: {name:'Saksham Jain',email: 'sakshamniaj@gmail.com'},
-      version: '1.0.0',
-    },
-    servers: [
-        {
-          url: 'http://localhost:8080',
-          description: 'Development server',
-        },
-      ],
-  };
+const swaggerDefinition = config.swaggerDefination;
 
   const options = {
     swaggerDefinition,
