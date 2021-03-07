@@ -2,7 +2,36 @@ var express = require('express');
 var app = express();
 var mongoose = require('mongoose'); 
 const config = require('./config');
-var books = require('./routes/book');
+const books = require('./routes/book');
+const swaggerJsDoc = require('swagger-jsdoc')
+const swaggerUi = require('swagger-ui-express');
+
+const swaggerDefinition = {
+    openapi: '3.0.0',
+    info: {
+      title: 'Libray Api Documentation',
+      description: 'assignment for techalchemy',
+            contact: {name:'Saksham Jain',email: 'sakshamniaj@gmail.com'},
+      version: '1.0.0',
+    },
+    servers: [
+        {
+          url: 'http://localhost:8080',
+          description: 'Development server',
+        },
+      ],
+  };
+
+  const options = {
+    swaggerDefinition,
+    // Paths to files containing OpenAPI definitions
+    apis: ['./routes/*.js'],
+  };
+
+  
+const swaggerSpec = swaggerJsDoc(options);
+
+
 
 const env = process.env.NODE_ENV || 'development';
 
@@ -25,6 +54,8 @@ mongoose.connect(MONGODB_URI, {
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+app.use('/api-docs',swaggerUi.serve,swaggerUi.setup(swaggerSpec))
 
 // Router
 app.use('/books', books);
